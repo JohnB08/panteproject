@@ -124,6 +124,8 @@ const shuffleArray = (array: userWeightObject[]) => {
 
 /**
  * velger to random pantere fra arrayet, delvis basert på vanskelighets"vekt"
+ * Skjekker for hver bruker om deres "weight" er høyrere enn et random tall. Kjører til den treffer to stk som er det.
+ * Balanserer alle brukere på en "weight" mellom 60-70. Vil alltid velge blandt de med høyest tall. Virker som er rettferdig nok. Velger skjeldent samme person flere ganger.
  * @param array
  */
 const pickPanter = (array: userWeightObject[], number: number) => {
