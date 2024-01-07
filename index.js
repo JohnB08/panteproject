@@ -1,12 +1,3 @@
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 var panter = /** @class */ (function () {
     function panter(name, weight) {
         this.name = name;
@@ -94,8 +85,8 @@ var randomNumber = function () {
 };
 var shuffleArray = function (array) {
     var _a;
-    var shuffledArray = __spreadArray([], array, true);
-    for (var i = shuffledArray.length; i > 0; i--) {
+    var shuffledArray = array.map(function (x) { return x; });
+    for (var i = shuffledArray.length - 1; i > 0; i--) {
         var randIndex = Math.floor(Math.random() * (i + 1));
         _a = [
             shuffledArray[randIndex],
@@ -106,6 +97,7 @@ var shuffleArray = function (array) {
 };
 var pickPanter = function (array) {
     var randomizedArray = shuffleArray(array);
+    console.log(randomizedArray);
     var randWeight = randomNumber();
     if (randomizedArray[0].currentWeight < randWeight) {
         if (randomizedArray[0].currentWeight < 90) {
@@ -120,7 +112,7 @@ var pickPanter = function (array) {
         winnerBracket.push(randomizedArray[0], randomizedArray[1]);
         userArray = loserBracket.concat(winnerBracket);
         saveArray(userArray);
-        return displayUsers(randomizedArray);
+        displayUsers(randomizedArray);
     }
     else
         pickPanter(randomizedArray);
@@ -144,6 +136,11 @@ subBtn.addEventListener("click", function () {
 saveBtn.addEventListener("click", function () { return saveArray(userArray); });
 clearBtn.addEventListener("click", clearLocalStorage);
 displayBtn.addEventListener("click", function () { return displayUsers(userArray); });
+runBtn.addEventListener("click", function () {
+    winnerBracket = [];
+    loserBracket = [];
+    pickPanter(userArray);
+});
 document.addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
         makeUser(input.value);

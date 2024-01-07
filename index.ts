@@ -96,8 +96,8 @@ const randomNumber = () => {
   return number;
 };
 const shuffleArray = (array: userWeightObject[]) => {
-  let shuffledArray = [...array];
-  for (let i = shuffledArray.length; i > 0; i--) {
+  let shuffledArray = array.map((x) => x);
+  for (let i = shuffledArray.length - 1; i > 0; i--) {
     const randIndex = Math.floor(Math.random() * (i + 1));
     [shuffledArray[i], shuffledArray[randIndex]] = [
       shuffledArray[randIndex],
@@ -108,6 +108,7 @@ const shuffleArray = (array: userWeightObject[]) => {
 };
 const pickPanter = (array: userWeightObject[]) => {
   const randomizedArray = shuffleArray(array);
+  console.log(randomizedArray);
   const randWeight = randomNumber();
   if (randomizedArray[0].currentWeight < randWeight) {
     if (randomizedArray[0].currentWeight < 90) {
@@ -122,7 +123,7 @@ const pickPanter = (array: userWeightObject[]) => {
     winnerBracket.push(randomizedArray[0], randomizedArray[1]);
     userArray = loserBracket.concat(winnerBracket);
     saveArray(userArray);
-    return displayUsers(randomizedArray);
+    displayUsers(randomizedArray);
   } else pickPanter(randomizedArray);
 };
 const saveArray = (array: userWeightObject[]) => {
@@ -146,6 +147,12 @@ saveBtn.addEventListener("click", () => saveArray(userArray));
 clearBtn.addEventListener("click", clearLocalStorage);
 
 displayBtn.addEventListener("click", () => displayUsers(userArray));
+
+runBtn.addEventListener("click", () => {
+  winnerBracket = [];
+  loserBracket = [];
+  pickPanter(userArray);
+});
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
