@@ -1,15 +1,15 @@
 interface userWeightObject {
   name: string;
-  baseWeight: number;
+  weightAdjust: number;
   currentWeight: number;
 }
 class panter {
   name: string;
-  baseWeight: number;
+  weightAdjust: number;
   currentWeight: number;
   constructor(name: string, weight: number) {
     this.name = name;
-    this.baseWeight = weight;
+    this.weightAdjust = weight;
     this.currentWeight = weight;
   }
 }
@@ -92,7 +92,11 @@ const displayUsers = (array: userWeightObject[]) => {
   });
   array.forEach((element) => {
     const displayName = makeElements("h3", { class: "outputText" });
-    displayName.textContent = `${element.name}. Current Weight: ${element.currentWeight} (Lower is better)`;
+    displayName.textContent = `${element.name}. Current Weight: ${
+      element.currentWeight
+    } Current WeightAdjustment: ${
+      element.currentWeight / element.weightAdjust
+    }`;
     outputField.append(displayName);
     activeElements.push(displayName);
   });
@@ -124,6 +128,21 @@ const shuffleArray = (array: userWeightObject[]) => {
   return shuffledArray;
 };
 
+const displayWinners = (array: userWeightObject[]) => {
+  console.log(winnerBracket);
+  winnerBracket.forEach((winner) => {
+    winner.currentWeight += 1;
+    winner.weightAdjust += 5;
+  });
+  array.forEach((user) => {
+    user.currentWeight -= 1;
+    user.weightAdjust -= 1;
+  });
+  userArray = array.concat(winnerBracket);
+  displayUsers(winnerBracket);
+  saveArray(userArray);
+};
+
 /**
  * velger to random pantere fra arrayet, delvis basert på vanskelighets"vekt"
  * Skjekker for hver bruker om deres "weight" er høyrere enn et random tall. Kjører til den treffer to stk som er det.
@@ -133,7 +152,9 @@ const shuffleArray = (array: userWeightObject[]) => {
 const pickPanter = (array: userWeightObject[], number: number) => {
   const randomizedArray = shuffleArray(array);
   randomizedArray.forEach((user) => {
-    if (user.currentWeight > number) {
+    const weightAdjust = user.currentWeight / user.weightAdjust;
+    const standardWeight = user.currentWeight * weightAdjust;
+    if (standardWeight > number) {
       if (user.currentWeight > 10) {
         user.currentWeight -= 1;
       }
@@ -144,17 +165,13 @@ const pickPanter = (array: userWeightObject[], number: number) => {
         user.currentWeight += 1;
       }
     }
-    if (winnerBracket.length === 2) {
-      displayUsers(winnerBracket);
-      userArray = randomizedArray.concat(winnerBracket);
-      saveArray(userArray);
-      return;
-    }
   });
   if (winnerBracket.length < 2 || winnerBracket.length > 2) {
     userArray = randomizedArray.concat(winnerBracket);
     winnerBracket = [];
     pickPanter(userArray, randomNumber());
+  } else {
+    return displayWinners(randomizedArray);
   }
 };
 /**

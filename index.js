@@ -1,7 +1,7 @@
 var panter = /** @class */ (function () {
     function panter(name, weight) {
         this.name = name;
-        this.baseWeight = weight;
+        this.weightAdjust = weight;
         this.currentWeight = weight;
     }
     return panter;
@@ -22,7 +22,9 @@ var activeElements = [];
  */
 /* Så hva betyr <Type extends keyof HTMLElementTagNameMap>?  De betyr at jeg lager en ny Type som er en samling av alle keys i HTMLElementTagNameMap type
 Så sier jeg til funksjonen at type parameteret må passe med den nye Type. Den så prøver å se om html typen Type, også kan ha en Record av attributene attributes.
-derfor sier den at parameterene som kommer inn, både typen OG attributer må passe til Type som den finner i HTMLElementTagNameMap[Type] */
+derfor sier den at parameterene som kommer inn, både typen OG attributer må passe til Type som den finner i HTMLElementTagNameMap[Type]
+Må finne en annen måte å skrive denne funksjonen på, så jeg kan bruke properties element[propertyName] i stedenfor å måtte bruke setAttribute.
+Savner å kunne sette element[textContent] = string*/
 var makeElements = function (type, attributes) {
     var element = document.createElement(type);
     Object.entries(attributes).forEach(function (attribute) {
@@ -77,7 +79,7 @@ var displayUsers = function (array) {
     });
     array.forEach(function (element) {
         var displayName = makeElements("h3", { class: "outputText" });
-        displayName.textContent = "".concat(element.name, ". Current Weight: ").concat(element.currentWeight, " (Lower is better)");
+        displayName.textContent = "".concat(element.name, ". Current Weight: ").concat(element.currentWeight, " Current WeightAdjustment: ").concat(element.currentWeight / element.weightAdjust);
         outputField.append(displayName);
         activeElements.push(displayName);
     });
@@ -107,14 +109,32 @@ var shuffleArray = function (array) {
     }
     return shuffledArray;
 };
+var displayWinners = function (array) {
+    console.log(winnerBracket);
+    winnerBracket.forEach(function (winner) {
+        winner.currentWeight += 1;
+        winner.weightAdjust += 5;
+    });
+    array.forEach(function (user) {
+        user.currentWeight -= 1;
+        user.weightAdjust -= 1;
+    });
+    userArray = array.concat(winnerBracket);
+    displayUsers(winnerBracket);
+    saveArray(userArray);
+};
 /**
  * velger to random pantere fra arrayet, delvis basert på vanskelighets"vekt"
+ * Skjekker for hver bruker om deres "weight" er høyrere enn et random tall. Kjører til den treffer to stk som er det.
+ * Balanserer alle brukere på en "weight" mellom 60-70. Vil alltid velge blandt de med høyest tall. Virker som er rettferdig nok. Velger skjeldent samme person flere ganger.
  * @param array
  */
 var pickPanter = function (array, number) {
     var randomizedArray = shuffleArray(array);
     randomizedArray.forEach(function (user) {
-        if (user.currentWeight > number) {
+        var weightAdjust = user.currentWeight / user.weightAdjust;
+        var standardWeight = user.currentWeight * weightAdjust;
+        if (standardWeight > number) {
             if (user.currentWeight > 10) {
                 user.currentWeight -= 1;
             }
@@ -126,17 +146,14 @@ var pickPanter = function (array, number) {
                 user.currentWeight += 1;
             }
         }
-        if (winnerBracket.length === 2) {
-            displayUsers(winnerBracket);
-            userArray = randomizedArray.concat(winnerBracket);
-            saveArray(userArray);
-            return;
-        }
     });
     if (winnerBracket.length < 2 || winnerBracket.length > 2) {
         userArray = randomizedArray.concat(winnerBracket);
         winnerBracket = [];
         pickPanter(userArray, randomNumber());
+    }
+    else {
+        return displayWinners(randomizedArray);
     }
 };
 /**
