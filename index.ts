@@ -31,7 +31,9 @@ let activeElements: HTMLElement[] = [];
 
 /* Så hva betyr <Type extends keyof HTMLElementTagNameMap>?  De betyr at jeg lager en ny Type som er en samling av alle keys i HTMLElementTagNameMap type
 Så sier jeg til funksjonen at type parameteret må passe med den nye Type. Den så prøver å se om html typen Type, også kan ha en Record av attributene attributes.
-derfor sier den at parameterene som kommer inn, både typen OG attributer må passe til Type som den finner i HTMLElementTagNameMap[Type] */
+derfor sier den at parameterene som kommer inn, både typen OG attributer må passe til Type som den finner i HTMLElementTagNameMap[Type] 
+Må finne en annen måte å skrive denne funksjonen på, så jeg kan bruke properties element[propertyName] i stedenfor å måtte bruke setAttribute.
+Savner å kunne sette element[textContent] = string*/
 const makeElements = <Type extends keyof HTMLElementTagNameMap>(
   type: Type,
   attributes: Record<string, string>
