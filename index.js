@@ -101,14 +101,14 @@ var pickPanter = function (array) {
     var randWeight = randomNumber();
     if (randomizedArray[0].currentWeight < randWeight) {
         if (randomizedArray[0].currentWeight < 90) {
-            randomizedArray[0].currentWeight += 10;
+            randomizedArray[0].currentWeight += 5;
         }
         loserBracket.push(randomizedArray[0]);
         randomizedArray.shift();
     }
     if (randomizedArray.length === 2) {
-        randomizedArray[0].currentWeight -= 10;
-        randomizedArray[1].currentWeight -= 10;
+        randomizedArray[0].currentWeight -= 5;
+        randomizedArray[1].currentWeight -= 5;
         winnerBracket.push(randomizedArray[0], randomizedArray[1]);
         userArray = loserBracket.concat(winnerBracket);
         saveArray(userArray);
