@@ -10,7 +10,6 @@ var existingArray = localStorage.getItem("userPanteArray");
 var userArray = existingArray
     ? JSON.parse(existingArray)
     : [];
-var loserBracket = [];
 var winnerBracket = [];
 var activeElements = [];
 /**
@@ -68,6 +67,10 @@ inputContainer.append(inputLabel, input, subBtn);
 btnContainer.append(saveBtn, clearBtn, displayBtn, runBtn);
 mainContainer.append(inputContainer, btnContainer, outputField);
 document.body.append(mainContainer);
+/**
+ * viser alle brukerene i et array med deres gjeldene weight
+ * @param array
+ */
 var displayUsers = function (array) {
     activeElements.forEach(function (element) {
         element.remove();
@@ -79,10 +82,19 @@ var displayUsers = function (array) {
         activeElements.push(displayName);
     });
 };
+/**
+ * lager et random tall mellom 1 og 100
+ * @returns
+ */
 var randomNumber = function () {
     var number = Math.ceil(Math.random() * 100);
     return number;
 };
+/**
+ * Randomiserer hvor folk er i et array.
+ * @param array
+ * @returns
+ */
 var shuffleArray = function (array) {
     var _a;
     var shuffledArray = array.map(function (x) { return x; });
@@ -95,37 +107,58 @@ var shuffleArray = function (array) {
     }
     return shuffledArray;
 };
-var pickPanter = function (array) {
+/**
+ * velger to random pantere fra arrayet, delvis basert på vanskelighets"vekt"
+ * @param array
+ */
+var pickPanter = function (array, number) {
     var randomizedArray = shuffleArray(array);
-    console.log(randomizedArray);
-    var randWeight = randomNumber();
-    console.log(randWeight);
-    if (randomizedArray[0].currentWeight < randWeight) {
-        if (randomizedArray[0].currentWeight < 90) {
-            randomizedArray[0].currentWeight += 1;
+    randomizedArray.forEach(function (user) {
+        if (user.currentWeight > number) {
+            if (user.currentWeight > 10) {
+                user.currentWeight -= 1;
+            }
+            winnerBracket.push(user);
+            randomizedArray.splice(randomizedArray.indexOf(user), 1);
         }
-        loserBracket.push(randomizedArray[0]);
-        randomizedArray.shift();
+        else {
+            if (user.currentWeight < 90) {
+                user.currentWeight += 1;
+            }
+        }
+        if (winnerBracket.length === 2) {
+            displayUsers(winnerBracket);
+            userArray = randomizedArray.concat(winnerBracket);
+            saveArray(userArray);
+            return;
+        }
+    });
+    if (winnerBracket.length < 2 || winnerBracket.length > 2) {
+        userArray = randomizedArray.concat(winnerBracket);
+        winnerBracket = [];
+        pickPanter(userArray, randomNumber());
     }
-    if (randomizedArray.length === 2) {
-        randomizedArray[0].currentWeight -= 5;
-        randomizedArray[1].currentWeight -= 5;
-        winnerBracket.push(randomizedArray[0], randomizedArray[1]);
-        userArray = loserBracket.concat(winnerBracket);
-        saveArray(userArray);
-        displayUsers(randomizedArray);
-    }
-    else
-        pickPanter(randomizedArray);
 };
+/**
+ * Lagrer arrayet med oppdaterte stats til localStorage
+ * @param array
+ */
 var saveArray = function (array) {
     var userArrayString = JSON.stringify(array);
     localStorage.setItem("userPanteArray", userArrayString);
 };
+/**
+ * Clearer localStorage for pante arrayet
+ */
 var clearLocalStorage = function () {
     localStorage.removeItem("userPanteArray");
     window.location.reload();
 };
+/**
+ * Adder en ny potensiell panter via panter constructor
+ * @param name navnet på panteren
+ * @param weight start"vekt" (hvor vanskelig er det å bli valgt)
+ */
 var makeUser = function (name, weight) {
     if (weight === void 0) { weight = 50; }
     var userObject = new panter(name, weight);
@@ -140,8 +173,7 @@ clearBtn.addEventListener("click", clearLocalStorage);
 displayBtn.addEventListener("click", function () { return displayUsers(userArray); });
 runBtn.addEventListener("click", function () {
     winnerBracket = [];
-    loserBracket = [];
-    pickPanter(userArray);
+    pickPanter(userArray, randomNumber());
 });
 document.addEventListener("keydown", function (event) {
     if (event.key === "Enter") {

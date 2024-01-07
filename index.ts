@@ -17,7 +17,6 @@ let existingArray = localStorage.getItem("userPanteArray");
 let userArray: userWeightObject[] = existingArray
   ? JSON.parse(existingArray)
   : [];
-let loserBracket: userWeightObject[] = [];
 let winnerBracket: userWeightObject[] = [];
 let activeElements: HTMLElement[] = [];
 
@@ -80,6 +79,11 @@ inputContainer.append(inputLabel, input, subBtn);
 btnContainer.append(saveBtn, clearBtn, displayBtn, runBtn);
 mainContainer.append(inputContainer, btnContainer, outputField);
 document.body.append(mainContainer);
+
+/**
+ * viser alle brukerene i et array med deres gjeldene weight
+ * @param array
+ */
 const displayUsers = (array: userWeightObject[]) => {
   activeElements.forEach((element) => {
     element.remove();
@@ -91,10 +95,21 @@ const displayUsers = (array: userWeightObject[]) => {
     activeElements.push(displayName);
   });
 };
+
+/**
+ * lager et random tall mellom 1 og 100
+ * @returns
+ */
 const randomNumber = () => {
   const number = Math.ceil(Math.random() * 100);
   return number;
 };
+
+/**
+ * Randomiserer hvor folk er i et array.
+ * @param array
+ * @returns
+ */
 const shuffleArray = (array: userWeightObject[]) => {
   let shuffledArray = array.map((x) => x);
   for (let i = shuffledArray.length - 1; i > 0; i--) {
@@ -106,35 +121,60 @@ const shuffleArray = (array: userWeightObject[]) => {
   }
   return shuffledArray;
 };
-const pickPanter = (array: userWeightObject[]) => {
+
+/**
+ * velger to random pantere fra arrayet, delvis basert på vanskelighets"vekt"
+ * @param array
+ */
+const pickPanter = (array: userWeightObject[], number: number) => {
   const randomizedArray = shuffleArray(array);
-  console.log(randomizedArray);
-  const randWeight = randomNumber();
-  console.log(randWeight);
-  if (randomizedArray[0].currentWeight < randWeight) {
-    if (randomizedArray[0].currentWeight < 90) {
-      randomizedArray[0].currentWeight += 1;
+  randomizedArray.forEach((user) => {
+    if (user.currentWeight > number) {
+      if (user.currentWeight > 10) {
+        user.currentWeight -= 1;
+      }
+      winnerBracket.push(user);
+      randomizedArray.splice(randomizedArray.indexOf(user), 1);
+    } else {
+      if (user.currentWeight < 90) {
+        user.currentWeight += 1;
+      }
     }
-    loserBracket.push(randomizedArray[0]);
-    randomizedArray.shift();
+    if (winnerBracket.length === 2) {
+      displayUsers(winnerBracket);
+      userArray = randomizedArray.concat(winnerBracket);
+      saveArray(userArray);
+      return;
+    }
+  });
+  if (winnerBracket.length < 2 || winnerBracket.length > 2) {
+    userArray = randomizedArray.concat(winnerBracket);
+    winnerBracket = [];
+    pickPanter(userArray, randomNumber());
   }
-  if (randomizedArray.length === 2) {
-    randomizedArray[0].currentWeight -= 5;
-    randomizedArray[1].currentWeight -= 5;
-    winnerBracket.push(randomizedArray[0], randomizedArray[1]);
-    userArray = loserBracket.concat(winnerBracket);
-    saveArray(userArray);
-    displayUsers(randomizedArray);
-  } else pickPanter(randomizedArray);
 };
+/**
+ * Lagrer arrayet med oppdaterte stats til localStorage
+ * @param array
+ */
 const saveArray = (array: userWeightObject[]) => {
   const userArrayString = JSON.stringify(array);
   localStorage.setItem("userPanteArray", userArrayString);
 };
+
+/**
+ * Clearer localStorage for pante arrayet
+ */
 const clearLocalStorage = () => {
   localStorage.removeItem("userPanteArray");
   window.location.reload();
 };
+
+/**
+ * Adder en ny potensiell panter via panter constructor
+ * @param name navnet på panteren
+ * @param weight start"vekt" (hvor vanskelig er det å bli valgt)
+ */
 const makeUser = (name: string, weight: number = 50) => {
   const userObject: userWeightObject = new panter(name, weight);
   userArray.push(userObject);
@@ -152,8 +192,7 @@ displayBtn.addEventListener("click", () => displayUsers(userArray));
 
 runBtn.addEventListener("click", () => {
   winnerBracket = [];
-  loserBracket = [];
-  pickPanter(userArray);
+  pickPanter(userArray, randomNumber());
 });
 
 document.addEventListener("keydown", (event) => {
