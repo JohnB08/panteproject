@@ -110,9 +110,10 @@ const pickPanter = (array: userWeightObject[]) => {
   const randomizedArray = shuffleArray(array);
   console.log(randomizedArray);
   const randWeight = randomNumber();
+  console.log(randWeight);
   if (randomizedArray[0].currentWeight < randWeight) {
     if (randomizedArray[0].currentWeight < 90) {
-      randomizedArray[0].currentWeight += 5;
+      randomizedArray[0].currentWeight += 1;
     }
     loserBracket.push(randomizedArray[0]);
     randomizedArray.shift();
@@ -132,6 +133,7 @@ const saveArray = (array: userWeightObject[]) => {
 };
 const clearLocalStorage = () => {
   localStorage.removeItem("userPanteArray");
+  window.location.reload();
 };
 const makeUser = (name: string, weight: number = 50) => {
   const userObject: userWeightObject = new panter(name, weight);

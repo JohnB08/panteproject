@@ -99,9 +99,10 @@ var pickPanter = function (array) {
     var randomizedArray = shuffleArray(array);
     console.log(randomizedArray);
     var randWeight = randomNumber();
+    console.log(randWeight);
     if (randomizedArray[0].currentWeight < randWeight) {
         if (randomizedArray[0].currentWeight < 90) {
-            randomizedArray[0].currentWeight += 5;
+            randomizedArray[0].currentWeight += 1;
         }
         loserBracket.push(randomizedArray[0]);
         randomizedArray.shift();
@@ -123,6 +124,7 @@ var saveArray = function (array) {
 };
 var clearLocalStorage = function () {
     localStorage.removeItem("userPanteArray");
+    window.location.reload();
 };
 var makeUser = function (name, weight) {
     if (weight === void 0) { weight = 50; }
