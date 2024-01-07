@@ -3,7 +3,6 @@ interface userWeightObject {
   baseWeight: number;
   currentWeight: number;
 }
-
 class panter {
   name: string;
   baseWeight: number;
@@ -15,18 +14,33 @@ class panter {
   }
 }
 let existingArray = localStorage.getItem("userPanteArray");
-let userArray: Object[] = existingArray ? JSON.parse(existingArray) : [];
+let userArray: userWeightObject[] = existingArray
+  ? JSON.parse(existingArray)
+  : [];
+let loserBracket: userWeightObject[] = [];
+let winnerBracket: userWeightObject[] = [];
+let activeElements: HTMLElement[] = [];
 
-const makeUser = (name: string, weight: number = 50) => {
-  const userObject: userWeightObject = new panter(name, weight);
-  userArray.push(userObject);
-};
+/**
+ * lager html element basert på hvilke element det finner i HTMLElementTagNameMap.
+ * Recorder en kopi av attributes for å identifisere rett element.
+ * Kan ikke sette
+ * @param type html element navn
+ * @param attributes object med html attributes
+ * @returns
+ */
 
-const makeElements = (type: string, properties: Object) => {
-  const element: HTMLElement = document.createElement(type);
-  Object.entries(properties).forEach((property) => {
-    const [propertyName, propertyValue] = property;
-    element.setAttribute(propertyName, propertyValue);
+/* Så hva betyr <Type extends keyof HTMLElementTagNameMap>?  De betyr at jeg lager en ny Type som er en samling av alle keys i HTMLElementTagNameMap type
+Så sier jeg til funksjonen at type parameteret må passe med den nye Type. Den så prøver å se om html typen Type, også kan ha en Record av attributene attributes.
+derfor sier den at parameterene som kommer inn, både typen OG attributer må passe til Type som den finner i HTMLElementTagNameMap[Type] */
+const makeElements = <Type extends keyof HTMLElementTagNameMap>(
+  type: Type,
+  attributes: Record<string, string>
+): HTMLElementTagNameMap[Type] => {
+  const element = document.createElement(type);
+  Object.entries(attributes).forEach((attribute) => {
+    const [attributeName, attributeValue] = attribute;
+    element.setAttribute(attributeName, attributeValue);
   });
   return element;
 };
@@ -55,24 +69,87 @@ const clearBtn = makeElements("button", {
   class: "clearBtn",
 });
 clearBtn.textContent = "Clear saved list!";
+const displayBtn = makeElements("button", { class: "displayBtn" });
+displayBtn.textContent = "Display current names.";
 const runBtn = makeElements("button", {
   class: "runBtn",
 });
 runBtn.textContent = "Run sim";
 const outputField = makeElements("div", { class: "outputField" });
 inputContainer.append(inputLabel, input, subBtn);
-btnContainer.append(saveBtn, clearBtn, runBtn);
+btnContainer.append(saveBtn, clearBtn, displayBtn, runBtn);
 mainContainer.append(inputContainer, btnContainer, outputField);
 document.body.append(mainContainer);
-
-const saveArray = () => {
-  const userArrayString = JSON.stringify(userArray);
+const displayUsers = (array: userWeightObject[]) => {
+  activeElements.forEach((element) => {
+    element.remove();
+  });
+  array.forEach((element) => {
+    const displayName = makeElements("h3", { class: "outputText" });
+    displayName.textContent = `${element.name}. Current Weight: ${element.currentWeight} (Lower is better)`;
+    outputField.append(displayName);
+    activeElements.push(displayName);
+  });
+};
+const randomNumber = () => {
+  const number = Math.ceil(Math.random() * 100);
+  return number;
+};
+const shuffleArray = (array: userWeightObject[]) => {
+  let shuffledArray = [...array];
+  for (let i = shuffledArray.length; i > 0; i--) {
+    const randIndex = Math.floor(Math.random() * (i + 1));
+    [shuffledArray[i], shuffledArray[randIndex]] = [
+      shuffledArray[randIndex],
+      shuffledArray[i],
+    ];
+  }
+  return shuffledArray;
+};
+const pickPanter = (array: userWeightObject[]) => {
+  const randomizedArray = shuffleArray(array);
+  const randWeight = randomNumber();
+  if (randomizedArray[0].currentWeight < randWeight) {
+    if (randomizedArray[0].currentWeight < 90) {
+      randomizedArray[0].currentWeight += 10;
+    }
+    loserBracket.push(randomizedArray[0]);
+    randomizedArray.shift();
+  }
+  if (randomizedArray.length === 2) {
+    randomizedArray[0].currentWeight -= 10;
+    randomizedArray[1].currentWeight -= 10;
+    winnerBracket.push(randomizedArray[0], randomizedArray[1]);
+    userArray = loserBracket.concat(winnerBracket);
+    saveArray(userArray);
+    return displayUsers(randomizedArray);
+  } else pickPanter(randomizedArray);
+};
+const saveArray = (array: userWeightObject[]) => {
+  const userArrayString = JSON.stringify(array);
   localStorage.setItem("userPanteArray", userArrayString);
 };
 const clearLocalStorage = () => {
   localStorage.removeItem("userPanteArray");
 };
+const makeUser = (name: string, weight: number = 50) => {
+  const userObject: userWeightObject = new panter(name, weight);
+  userArray.push(userObject);
+};
+subBtn.addEventListener("click", () => {
+  makeUser(input.value);
+  input.value = "";
+});
 
-saveBtn.addEventListener("click", saveArray);
+saveBtn.addEventListener("click", () => saveArray(userArray));
 
 clearBtn.addEventListener("click", clearLocalStorage);
+
+displayBtn.addEventListener("click", () => displayUsers(userArray));
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    makeUser(input.value);
+    input.value = "";
+  }
+});

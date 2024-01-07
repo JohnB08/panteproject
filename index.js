@@ -1,3 +1,12 @@
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var panter = /** @class */ (function () {
     function panter(name, weight) {
         this.name = name;
@@ -7,17 +16,28 @@ var panter = /** @class */ (function () {
     return panter;
 }());
 var existingArray = localStorage.getItem("userPanteArray");
-var userArray = existingArray ? JSON.parse(existingArray) : [];
-var makeUser = function (name, weight) {
-    if (weight === void 0) { weight = 50; }
-    var userObject = new panter(name, weight);
-    userArray.push(userObject);
-};
-var makeElements = function (type, properties) {
+var userArray = existingArray
+    ? JSON.parse(existingArray)
+    : [];
+var loserBracket = [];
+var winnerBracket = [];
+var activeElements = [];
+/**
+ * lager html element basert på hvilke element det finner i HTMLElementTagNameMap.
+ * Recorder en kopi av attributes for å identifisere rett element.
+ * Kan ikke sette
+ * @param type html element navn
+ * @param attributes object med html attributes
+ * @returns
+ */
+/* Så hva betyr <Type extends keyof HTMLElementTagNameMap>?  De betyr at jeg lager en ny Type som er en samling av alle keys i HTMLElementTagNameMap type
+Så sier jeg til funksjonen at type parameteret må passe med den nye Type. Den så prøver å se om html typen Type, også kan ha en Record av attributene attributes.
+derfor sier den at parameterene som kommer inn, både typen OG attributer må passe til Type som den finner i HTMLElementTagNameMap[Type] */
+var makeElements = function (type, attributes) {
     var element = document.createElement(type);
-    Object.entries(properties).forEach(function (property) {
-        var propertyName = property[0], propertyValue = property[1];
-        element.setAttribute(propertyName, propertyValue);
+    Object.entries(attributes).forEach(function (attribute) {
+        var attributeName = attribute[0], attributeValue = attribute[1];
+        element.setAttribute(attributeName, attributeValue);
     });
     return element;
 };
@@ -46,21 +66,87 @@ var clearBtn = makeElements("button", {
     class: "clearBtn",
 });
 clearBtn.textContent = "Clear saved list!";
+var displayBtn = makeElements("button", { class: "displayBtn" });
+displayBtn.textContent = "Display current names.";
 var runBtn = makeElements("button", {
     class: "runBtn",
 });
 runBtn.textContent = "Run sim";
 var outputField = makeElements("div", { class: "outputField" });
 inputContainer.append(inputLabel, input, subBtn);
-btnContainer.append(saveBtn, clearBtn, runBtn);
+btnContainer.append(saveBtn, clearBtn, displayBtn, runBtn);
 mainContainer.append(inputContainer, btnContainer, outputField);
 document.body.append(mainContainer);
-var saveArray = function () {
-    var userArrayString = JSON.stringify(userArray);
+var displayUsers = function (array) {
+    activeElements.forEach(function (element) {
+        element.remove();
+    });
+    array.forEach(function (element) {
+        var displayName = makeElements("h3", { class: "outputText" });
+        displayName.textContent = "".concat(element.name, ". Current Weight: ").concat(element.currentWeight, " (Lower is better)");
+        outputField.append(displayName);
+        activeElements.push(displayName);
+    });
+};
+var randomNumber = function () {
+    var number = Math.ceil(Math.random() * 100);
+    return number;
+};
+var shuffleArray = function (array) {
+    var _a;
+    var shuffledArray = __spreadArray([], array, true);
+    for (var i = shuffledArray.length; i > 0; i--) {
+        var randIndex = Math.floor(Math.random() * (i + 1));
+        _a = [
+            shuffledArray[randIndex],
+            shuffledArray[i],
+        ], shuffledArray[i] = _a[0], shuffledArray[randIndex] = _a[1];
+    }
+    return shuffledArray;
+};
+var pickPanter = function (array) {
+    var randomizedArray = shuffleArray(array);
+    var randWeight = randomNumber();
+    if (randomizedArray[0].currentWeight < randWeight) {
+        if (randomizedArray[0].currentWeight < 90) {
+            randomizedArray[0].currentWeight += 10;
+        }
+        loserBracket.push(randomizedArray[0]);
+        randomizedArray.shift();
+    }
+    if (randomizedArray.length === 2) {
+        randomizedArray[0].currentWeight -= 10;
+        randomizedArray[1].currentWeight -= 10;
+        winnerBracket.push(randomizedArray[0], randomizedArray[1]);
+        userArray = loserBracket.concat(winnerBracket);
+        saveArray(userArray);
+        return displayUsers(randomizedArray);
+    }
+    else
+        pickPanter(randomizedArray);
+};
+var saveArray = function (array) {
+    var userArrayString = JSON.stringify(array);
     localStorage.setItem("userPanteArray", userArrayString);
 };
 var clearLocalStorage = function () {
     localStorage.removeItem("userPanteArray");
 };
-saveBtn.addEventListener("click", saveArray);
+var makeUser = function (name, weight) {
+    if (weight === void 0) { weight = 50; }
+    var userObject = new panter(name, weight);
+    userArray.push(userObject);
+};
+subBtn.addEventListener("click", function () {
+    makeUser(input.value);
+    input.value = "";
+});
+saveBtn.addEventListener("click", function () { return saveArray(userArray); });
 clearBtn.addEventListener("click", clearLocalStorage);
+displayBtn.addEventListener("click", function () { return displayUsers(userArray); });
+document.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+        makeUser(input.value);
+        input.value = "";
+    }
+});
