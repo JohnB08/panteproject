@@ -4,7 +4,7 @@ interface userWeightObject {
   currentWeight: number;
 }
 
-class user {
+class panter {
   name: string;
   baseWeight: number;
   currentWeight: number;
@@ -14,11 +14,11 @@ class user {
     this.currentWeight = weight;
   }
 }
-
-let userArray: Object[] = [];
+let existingArray = localStorage.getItem("userPanteArray");
+let userArray: Object[] = existingArray ? JSON.parse(existingArray) : [];
 
 const makeUser = (name: string, weight: number = 50) => {
-  const userObject: userWeightObject = new user(name, weight);
+  const userObject: userWeightObject = new panter(name, weight);
   userArray.push(userObject);
 };
 
@@ -64,3 +64,15 @@ inputContainer.append(inputLabel, input, subBtn);
 btnContainer.append(saveBtn, clearBtn, runBtn);
 mainContainer.append(inputContainer, btnContainer, outputField);
 document.body.append(mainContainer);
+
+const saveArray = () => {
+  const userArrayString = JSON.stringify(userArray);
+  localStorage.setItem("userPanteArray", userArrayString);
+};
+const clearLocalStorage = () => {
+  localStorage.removeItem("userPanteArray");
+};
+
+saveBtn.addEventListener("click", saveArray);
+
+clearBtn.addEventListener("click", clearLocalStorage);

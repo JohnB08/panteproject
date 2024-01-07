@@ -1,15 +1,16 @@
-var user = /** @class */ (function () {
-    function user(name, weight) {
+var panter = /** @class */ (function () {
+    function panter(name, weight) {
         this.name = name;
         this.baseWeight = weight;
         this.currentWeight = weight;
     }
-    return user;
+    return panter;
 }());
-var userArray = [];
+var existingArray = localStorage.getItem("userPanteArray");
+var userArray = existingArray ? JSON.parse(existingArray) : [];
 var makeUser = function (name, weight) {
     if (weight === void 0) { weight = 50; }
-    var userObject = new user(name, weight);
+    var userObject = new panter(name, weight);
     userArray.push(userObject);
 };
 var makeElements = function (type, properties) {
@@ -54,3 +55,12 @@ inputContainer.append(inputLabel, input, subBtn);
 btnContainer.append(saveBtn, clearBtn, runBtn);
 mainContainer.append(inputContainer, btnContainer, outputField);
 document.body.append(mainContainer);
+var saveArray = function () {
+    var userArrayString = JSON.stringify(userArray);
+    localStorage.setItem("userPanteArray", userArrayString);
+};
+var clearLocalStorage = function () {
+    localStorage.removeItem("userPanteArray");
+};
+saveBtn.addEventListener("click", saveArray);
+clearBtn.addEventListener("click", clearLocalStorage);
