@@ -2,7 +2,7 @@ var panter = /** @class */ (function () {
     function panter(name, weight) {
         this.name = name;
         this.weightAdjust = weight;
-        this.currentWeight = weight;
+        this.coinFlipChance = weight;
     }
     return panter;
 }());
@@ -79,7 +79,7 @@ var displayUsers = function (array) {
     });
     array.forEach(function (element) {
         var displayName = makeElements("h3", { class: "outputText" });
-        displayName.textContent = "".concat(element.name, ". Current Weight: ").concat(element.currentWeight, " Current WeightAdjustment: ").concat(element.currentWeight / element.weightAdjust);
+        displayName.textContent = "".concat(element.name, ". Current Weight: ").concat(element.coinFlipChance, " Current WeightAdjustment: ").concat(element.coinFlipChance / element.weightAdjust);
         outputField.append(displayName);
         activeElements.push(displayName);
     });
@@ -112,15 +112,16 @@ var shuffleArray = function (array) {
 var displayWinners = function (array) {
     console.log(winnerBracket);
     winnerBracket.forEach(function (winner) {
-        winner.currentWeight += 1;
-        winner.weightAdjust += 5;
+        winner.weightAdjust += userArray.length / 2 - 1;
     });
+    displayUsers(winnerBracket);
     array.forEach(function (user) {
-        user.currentWeight -= 1;
         user.weightAdjust -= 1;
     });
     userArray = array.concat(winnerBracket);
-    displayUsers(winnerBracket);
+    userArray.forEach(function (user) {
+        user.coinFlipChance = 50;
+    });
     saveArray(userArray);
 };
 /**
@@ -132,18 +133,18 @@ var displayWinners = function (array) {
 var pickPanter = function (array, number) {
     var randomizedArray = shuffleArray(array);
     randomizedArray.forEach(function (user) {
-        var weightAdjust = user.currentWeight / user.weightAdjust;
-        var standardWeight = user.currentWeight * weightAdjust;
+        var weightAdjust = user.coinFlipChance / user.weightAdjust;
+        var standardWeight = user.coinFlipChance * weightAdjust;
         if (standardWeight > number) {
-            if (user.currentWeight > 10) {
-                user.currentWeight -= 1;
+            if (user.coinFlipChance > 10) {
+                user.coinFlipChance -= 1;
             }
             winnerBracket.push(user);
             randomizedArray.splice(randomizedArray.indexOf(user), 1);
         }
         else {
-            if (user.currentWeight < 90) {
-                user.currentWeight += 1;
+            if (user.coinFlipChance < 90) {
+                user.coinFlipChance += 1;
             }
         }
     });

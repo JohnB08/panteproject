@@ -1,16 +1,16 @@
 interface userWeightObject {
   name: string;
   weightAdjust: number;
-  currentWeight: number;
+  coinFlipChance: number;
 }
 class panter {
   name: string;
   weightAdjust: number;
-  currentWeight: number;
+  coinFlipChance: number;
   constructor(name: string, weight: number) {
     this.name = name;
     this.weightAdjust = weight;
-    this.currentWeight = weight;
+    this.coinFlipChance = weight;
   }
 }
 let existingArray = localStorage.getItem("userPanteArray");
@@ -93,9 +93,9 @@ const displayUsers = (array: userWeightObject[]) => {
   array.forEach((element) => {
     const displayName = makeElements("h3", { class: "outputText" });
     displayName.textContent = `${element.name}. Current Weight: ${
-      element.currentWeight
+      element.coinFlipChance
     } Current WeightAdjustment: ${
-      element.currentWeight / element.weightAdjust
+      element.coinFlipChance / element.weightAdjust
     }`;
     outputField.append(displayName);
     activeElements.push(displayName);
@@ -131,15 +131,16 @@ const shuffleArray = (array: userWeightObject[]) => {
 const displayWinners = (array: userWeightObject[]) => {
   console.log(winnerBracket);
   winnerBracket.forEach((winner) => {
-    winner.currentWeight += 1;
-    winner.weightAdjust += 5;
+    winner.weightAdjust += userArray.length / 2 - 1;
   });
+  displayUsers(winnerBracket);
   array.forEach((user) => {
-    user.currentWeight -= 1;
     user.weightAdjust -= 1;
   });
   userArray = array.concat(winnerBracket);
-  displayUsers(winnerBracket);
+  userArray.forEach((user) => {
+    user.coinFlipChance = 50;
+  });
   saveArray(userArray);
 };
 
@@ -152,17 +153,17 @@ const displayWinners = (array: userWeightObject[]) => {
 const pickPanter = (array: userWeightObject[], number: number) => {
   const randomizedArray = shuffleArray(array);
   randomizedArray.forEach((user) => {
-    const weightAdjust = user.currentWeight / user.weightAdjust;
-    const standardWeight = user.currentWeight * weightAdjust;
+    const weightAdjust = user.coinFlipChance / user.weightAdjust;
+    const standardWeight = user.coinFlipChance * weightAdjust;
     if (standardWeight > number) {
-      if (user.currentWeight > 10) {
-        user.currentWeight -= 1;
+      if (user.coinFlipChance > 10) {
+        user.coinFlipChance -= 1;
       }
       winnerBracket.push(user);
       randomizedArray.splice(randomizedArray.indexOf(user), 1);
     } else {
-      if (user.currentWeight < 90) {
-        user.currentWeight += 1;
+      if (user.coinFlipChance < 90) {
+        user.coinFlipChance += 1;
       }
     }
   });
