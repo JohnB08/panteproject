@@ -1,8 +1,13 @@
+/* Interface med struktur objektet må følge. */
+
 interface userWeightObject {
   name: string;
   weightAdjust: number;
   coinFlipChance: number;
 }
+
+/* class struktur inkl. construktor som følger interface*/
+
 class panter {
   name: string;
   weightAdjust: number;
@@ -13,7 +18,12 @@ class panter {
     this.coinFlipChance = weight;
   }
 }
+
+/* Ser om arrayet allerede er lagret i localStorage */
 let existingArray = localStorage.getItem("userPanteArray");
+
+/* Lager et array som er enten et tomt array, eller det som finnes i localStorage */
+
 let userArray: userWeightObject[] = existingArray
   ? JSON.parse(existingArray)
   : [];
@@ -45,6 +55,9 @@ const makeElements = <Type extends keyof HTMLElementTagNameMap>(
   });
   return element;
 };
+
+/* Lager HTML elementer */
+
 const mainContainer = makeElements("div", { class: "mainContainer" });
 const inputContainer = makeElements("div", { class: "inputContainer" });
 const input = makeElements("input", {
@@ -128,6 +141,10 @@ const shuffleArray = (array: userWeightObject[]) => {
   return shuffledArray;
 };
 
+/**
+ * Viser "vinnerene" og adjuster deres vinnersjanse til neste gang.
+ * @param array arrayet med vinnerene
+ */
 const displayWinners = (array: userWeightObject[]) => {
   console.log(winnerBracket);
   winnerBracket.forEach((winner) => {
@@ -218,8 +235,11 @@ runBtn.addEventListener("click", () => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") {
+  if (event.key === "Enter" && input.value) {
     makeUser(input.value);
     input.value = "";
+  } else if (event.key === "Enter" && !input.value) {
+    winnerBracket = [];
+    pickPanter(userArray, randomNumber());
   }
 });
