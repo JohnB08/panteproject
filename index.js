@@ -1,3 +1,5 @@
+/* Interface med struktur objektet må følge. */
+/* class struktur inkl. construktor som følger interface*/
 var panter = /** @class */ (function () {
     function panter(name, weight) {
         this.name = name;
@@ -6,7 +8,9 @@ var panter = /** @class */ (function () {
     }
     return panter;
 }());
+/* Ser om arrayet allerede er lagret i localStorage */
 var existingArray = localStorage.getItem("userPanteArray");
+/* Lager et array som er enten et tomt array, eller det som finnes i localStorage */
 var userArray = existingArray
     ? JSON.parse(existingArray)
     : [];
@@ -33,6 +37,7 @@ var makeElements = function (type, attributes) {
     });
     return element;
 };
+/* Lager HTML elementer */
 var mainContainer = makeElements("div", { class: "mainContainer" });
 var inputContainer = makeElements("div", { class: "inputContainer" });
 var input = makeElements("input", {
@@ -109,6 +114,10 @@ var shuffleArray = function (array) {
     }
     return shuffledArray;
 };
+/**
+ * Viser "vinnerene" og adjuster deres vinnersjanse til neste gang.
+ * @param array arrayet med vinnerene
+ */
 var displayWinners = function (array) {
     console.log(winnerBracket);
     winnerBracket.forEach(function (winner) {
@@ -194,8 +203,12 @@ runBtn.addEventListener("click", function () {
     pickPanter(userArray, randomNumber());
 });
 document.addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && input.value) {
         makeUser(input.value);
         input.value = "";
+    }
+    else if (event.key === "Enter" && !input.value) {
+        winnerBracket = [];
+        pickPanter(userArray, randomNumber());
     }
 });
