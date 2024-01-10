@@ -10,6 +10,7 @@ var panter = /** @class */ (function () {
 }());
 /* Ser om arrayet allerede er lagret i localStorage */
 var existingArray = localStorage.getItem("userPanteArray");
+var count = 0;
 /* Lager et array som er enten et tomt array, eller det som finnes i localStorage */
 var userArray = existingArray
     ? JSON.parse(existingArray)
@@ -119,6 +120,7 @@ var shuffleArray = function (array) {
  * @param array arrayet med vinnerene
  */
 var displayWinners = function (array) {
+    console.log(count);
     console.log(winnerBracket);
     winnerBracket.forEach(function (winner) {
         winner.weightAdjust += userArray.length / 2 - 1;
@@ -140,6 +142,7 @@ var displayWinners = function (array) {
  * @param array
  */
 var pickPanter = function (array, number) {
+    count++;
     var randomizedArray = shuffleArray(array);
     randomizedArray.forEach(function (user) {
         var weightAdjust = user.coinFlipChance / user.weightAdjust;

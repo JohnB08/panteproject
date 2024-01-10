@@ -21,7 +21,7 @@ class panter {
 
 /* Ser om arrayet allerede er lagret i localStorage */
 let existingArray = localStorage.getItem("userPanteArray");
-
+let count: number = 0;
 /* Lager et array som er enten et tomt array, eller det som finnes i localStorage */
 
 let userArray: userWeightObject[] = existingArray
@@ -146,6 +146,7 @@ const shuffleArray = (array: userWeightObject[]) => {
  * @param array arrayet med vinnerene
  */
 const displayWinners = (array: userWeightObject[]) => {
+  console.log(count);
   console.log(winnerBracket);
   winnerBracket.forEach((winner) => {
     winner.weightAdjust += userArray.length / 2 - 1;
@@ -168,6 +169,7 @@ const displayWinners = (array: userWeightObject[]) => {
  * @param array
  */
 const pickPanter = (array: userWeightObject[], number: number) => {
+  count++;
   const randomizedArray = shuffleArray(array);
   randomizedArray.forEach((user) => {
     const weightAdjust = user.coinFlipChance / user.weightAdjust;
